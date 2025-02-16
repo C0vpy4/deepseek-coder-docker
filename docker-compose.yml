@@ -7,11 +7,11 @@ services:
       dockerfile: Dockerfile
     container_name: deepseek-coder
     ports:
-      - "8080:80"
-      - "5900:5900"
-      - "7860:7860"
+      - "8080:80" # Прокси через nginx
+      - "5900:5900" # VNC порт
+      - "7860:7860" # Приложение
     volumes:
       - ./app:/app
     environment:
-      - VNC_PASSWORD=myvncpassword # Установи пароль для VNC, если нужно
+      - VNC_PASSWORD=artem079 # Установите пароль для VNC
     restart: unless-stopped
