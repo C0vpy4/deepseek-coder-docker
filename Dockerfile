@@ -45,3 +45,6 @@ EXPOSE 80 5900 7860
 
 # Запускаем скрипт автозапуска
 CMD ["/home/deepseek-coder/startup.sh"]
+
+
+
