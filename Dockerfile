@@ -1,6 +1,6 @@
 FROM dorowu/ubuntu-desktop-lxde-vnc:latest
 
-# Установка зависимостей
+# Установка зависимостей и добавление ключа для Google
 RUN apt-get update && apt-get install -y \
     wget \
     git \
@@ -10,9 +10,14 @@ RUN apt-get update && apt-get install -y \
     libgl1 \
     libglib2.0-0 \
     nginx \
+    gnupg2 \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Клонирование репозитория DeepSeek Coder
+# Добавляем ключ GPG для репозитория Google Chrome (если это нужно для твоей конфигурации)
+RUN curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | apt-key add -
+
+# Установка зависимостей проекта DeepSeek Coder
 RUN git clone https://github.com/deepseek-ai/deepseek-coder /app/deepseek-coder
 
 WORKDIR /app/deepseek-coder
