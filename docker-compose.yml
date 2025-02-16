@@ -14,10 +14,4 @@ services:
       - ./app:/app
     environment:
       - VNC_PASSWORD=myvncpassword # Установи пароль для VNC, если нужно
-    networks:
-      - deepseek-network
     restart: unless-stopped
-
-networks:
-  deepseek-network:
-    driver: bridge

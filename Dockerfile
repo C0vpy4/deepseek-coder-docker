@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y \
     nginx \
     && rm -rf /var/lib/apt/lists/*
 
-# Клонирование репозитория DeepSeek Coder (пример, замените на реальный URL)
+# Клонирование репозитория DeepSeek Coder
 RUN git clone https://github.com/deepseek-ai/deepseek-coder /app/deepseek-coder
 
 WORKDIR /app/deepseek-coder
@@ -20,7 +20,7 @@ WORKDIR /app/deepseek-coder
 # Установка Python зависимостей
 RUN pip3 install -r requirements.txt
 
-# Настройка сервисов
+# Настройка Nginx
 COPY nginx.conf /etc/nginx/sites-available/default
 RUN ln -sf /dev/stdout /var/log/nginx/access.log \
     && ln -sf /dev/stderr /var/log/nginx/error.log
