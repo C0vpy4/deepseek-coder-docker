@@ -1,6 +1,7 @@
-FROM dorowu/ubuntu-desktop-lxde-vnc:latest
+# Используем образ с Ubuntu
+FROM ubuntu:20.04
 
-# Установка зависимостей и добавление ключа для Google
+# Устанавливаем основные зависимости
 RUN apt-get update && apt-get install -y \
     wget \
     git \
@@ -10,33 +11,37 @@ RUN apt-get update && apt-get install -y \
     libgl1 \
     libglib2.0-0 \
     nginx \
-    gnupg2 \
+    xfce4 \
+    xfce4-goodies \
+    tightvncserver \
     curl \
+    gnupg2 \
     && rm -rf /var/lib/apt/lists/*
 
-# Добавляем ключ GPG для репозитория Google Chrome (если это нужно для твоей конфигурации)
-RUN curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | apt-key add -
+# Клонируем репозиторий DeepSeek Coder
+RUN git clone https://github.com/deepseek-ai/deepseek-coder /home/deepseek-coder
 
-# Установка зависимостей проекта DeepSeek Coder
-RUN git clone https://github.com/deepseek-ai/deepseek-coder /app/deepseek-coder
-
-WORKDIR /app/deepseek-coder
-
-# Установка Python зависимостей
+# Устанавливаем Python зависимости
+WORKDIR /home/deepseek-coder
 RUN pip3 install -r requirements.txt
 
-# Настройка nginx
-COPY nginx.conf /etc/nginx/sites-available/default
-RUN ln -sf /dev/stdout /var/log/nginx/access.log \
-    && ln -sf /dev/stderr /var/log/nginx/error.log
+# Настройка VNC
+RUN echo "#!/bin/bash\n\
+xrdb $HOME/.Xresources\n\
+startxfce4 &\n\
+" > /home/deepseek-coder/.vnc/xstartup && \
+    chmod +x /home/deepseek-coder/.vnc/xstartup
 
 # Настройка автозапуска
 RUN echo "#!/bin/bash\n\
-service nginx start\n\
-python3 app.py --host 0.0.0.0 --port 7860 &\n\
-vncserver :0 -geometry 1920x1080 -depth 24" > /startup.sh \
-    && chmod +x /startup.sh
+vncserver :1 -geometry 1920x1080 -depth 24\n\
+python3 /home/deepseek-coder/app.py --host 0.0.0.0 --port 7860 &\n\
+nginx -g 'daemon off;'\n\
+" > /home/deepseek-coder/startup.sh && \
+    chmod +x /home/deepseek-coder/startup.sh
 
-EXPOSE 80 5900 6080 7860
+# Открываем порты для VNC и приложения
+EXPOSE 80 5900 7860
 
-CMD ["/startup.sh"]
+# Запускаем скрипт автозапуска
+CMD ["/home/deepseek-coder/startup.sh"]
